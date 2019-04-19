@@ -1,4 +1,4 @@
-module terraform-inventory
+module terraform_inventory
 
 go 1.12
 
