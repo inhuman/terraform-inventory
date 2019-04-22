@@ -23,7 +23,7 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 				},
 			},
 		},
-		Meta: &{
+		Meta: &Meta{
 			Hostvars: map[string]HostVar{},
 		},
 	}
