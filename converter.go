@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/pkg/errors"
+	"path"
 	"reflect"
 	"strings"
 )
@@ -201,7 +202,7 @@ func getOutputs(module *terraform.ModuleState, modules []*terraform.ModuleState)
 	return getOutputs(parent, modules)
 }
 
-func getState(consulAddr, clusterTfStatePrefix, project string) ([]byte, error) {
+func getState(consulAddr, datacenter, clusterTfStatePrefix, project string) ([]byte, error) {
 
 	client, err := api.NewClient(&api.Config{
 		Address: consulAddr,
@@ -211,10 +212,10 @@ func getState(consulAddr, clusterTfStatePrefix, project string) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
-
-	k, _, err := client.KV().Get(strings.Join([]string{clusterTfStatePrefix, project}, ":"), &api.QueryOptions{
-		Datacenter: "infra1",
+	k, _, err := client.KV().Get(path.Join(clusterTfStatePrefix, project), &api.QueryOptions{
+		Datacenter: datacenter,
 	})
+
 	if err != nil {
 		return nil, err
 	}
