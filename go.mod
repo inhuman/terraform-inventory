@@ -1,4 +1,4 @@
-module terraform-inventory
+module github.com/inhuman/terraform-inventory
 
 go 1.12
 
