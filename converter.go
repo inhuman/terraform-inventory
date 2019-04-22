@@ -140,9 +140,9 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 	return i, nil
 }
 
-func Run(consulAddr, clusterTfStatePrefix, project string) (*Inventory, error) {
+func Run(consulAddr, datacenter, clusterTfStatePrefix, project string) (*Inventory, error) {
 
-	stateBytes, err := getState(consulAddr, clusterTfStatePrefix, project)
+	stateBytes, err := getState(consulAddr, datacenter, clusterTfStatePrefix, project)
 	if err != nil {
 		return nil, err
 	}
