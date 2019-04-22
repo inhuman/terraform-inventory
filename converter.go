@@ -23,6 +23,9 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 				},
 			},
 		},
+		Meta: &{
+			Hostvars: map[string]HostVar{},
+		},
 	}
 
 	if len(state.Modules) < 1 {
