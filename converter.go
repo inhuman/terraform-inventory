@@ -3,10 +3,8 @@ package terraform_inventory
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/pkg/errors"
-	"path"
 	"reflect"
 	"strings"
 )
@@ -38,9 +36,10 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 		}
 
 		// if path contains only / - skip
-		if len(m.Path) < 2 {
-			continue
-		}
+		//if len(m.Path) < 2 {
+		//	fmt.Printf("module continue with path: %s\n", m.Path)
+		//	continue
+		//}
 
 		outputs := getOutputs(m, state.Modules)
 
@@ -143,16 +142,16 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 	return i, nil
 }
 
-func Run(consulAddr, datacenter, clusterTfStatePrefix, project string) (*Inventory, error) {
+func Run(project string, state []byte) (*Inventory, error) {
 
-	stateBytes, err := getState(consulAddr, datacenter, clusterTfStatePrefix, project)
-	if err != nil {
-		return nil, err
-	}
+	//stateBytes, err := getState(consulAddr, datacenter, clusterTfStatePrefix, project)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	tfState := &terraform.State{}
 
-	if err := json.Unmarshal(stateBytes, tfState); err != nil {
+	if err := json.Unmarshal(state, tfState); err != nil {
 		return nil, err
 	}
 
@@ -182,7 +181,11 @@ func isVm(name string) bool {
 
 func getOutputs(module *terraform.ModuleState, modules []*terraform.ModuleState) map[string]*terraform.OutputState {
 
-	if len(module.Path) == 1 {
+	//if len(module.Path) == 1 {
+	//	return nil
+	//}
+
+	if module == nil {
 		return nil
 	}
 
@@ -205,27 +208,27 @@ func getOutputs(module *terraform.ModuleState, modules []*terraform.ModuleState)
 	return getOutputs(parent, modules)
 }
 
-func getState(consulAddr, datacenter, clusterTfStatePrefix, project string) ([]byte, error) {
-
-	client, err := api.NewClient(&api.Config{
-		Address: consulAddr,
-		Scheme:  "http",
-	})
-
-	if err != nil {
-		return nil, err
-	}
-	k, _, err := client.KV().Get(path.Join(clusterTfStatePrefix, project), &api.QueryOptions{
-		Datacenter: datacenter,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	if k != nil {
-		return k.Value, nil
-	}
-
-	return nil, nil
-}
+//func getState(consulAddr, datacenter, clusterTfStatePrefix, project string) ([]byte, error) {
+//
+//	client, err := api.NewClient(&api.Config{
+//		Address: consulAddr,
+//		Scheme:  "http",
+//	})
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	k, _, err := client.KV().Get(path.Join(clusterTfStatePrefix, project), &api.QueryOptions{
+//		Datacenter: datacenter,
+//	})
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	if k != nil {
+//		return k.Value, nil
+//	}
+//
+//	return nil, nil
+//}
