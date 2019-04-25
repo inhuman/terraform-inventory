@@ -1,35 +1,13 @@
 package terraform_inventory
 
-import "encoding/json"
-
 type HostVar struct {
 	Hostname string `json:"hostname"`
 }
 
 type Group struct {
-	Hosts    []string               `json:"hosts"`
-	Children []string               `json:"children"`
-	Vars     map[string]interface{} `json:"vars"`
+	Hosts    map[string]map[string]string `yaml:"hosts,omitempty"`
+	Children map[string]*Group            `yaml:"children,omitempty"`
+	Vars     map[string]interface{}       `yaml:"vars,omitempty"`
 }
 
-type Meta struct {
-	Hostvars map[string]HostVar `json:"hostvars"`
-}
-
-type Inventory struct {
-	Meta   *Meta `json:"_meta"`
-	Groups map[string]*Group
-}
-
-func (i *Inventory) MarshalJSON() ([]byte, error) {
-
-	m := make(map[string]interface{})
-
-	m["_meta"] = i.Meta
-
-	for name, group := range i.Groups {
-		m[name] = group
-	}
-
-	return json.MarshalIndent(m, "", " ")
-}
+type YmlInventory map[string]*Group

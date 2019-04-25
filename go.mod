@@ -3,7 +3,7 @@ module github.com/inhuman/terraform-inventory
 go 1.12
 
 require (
-	github.com/hashicorp/consul v0.0.0-20171026175957-610f3c86a089
+	github.com/ghodss/yaml v1.0.0
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
@@ -16,4 +16,5 @@ require (
 	github.com/stretchr/testify v1.3.0
 	golang.org/x/crypto v0.0.0-20181029021203-45a5f77698d3 // indirect
 	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc // indirect
+	gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e
 )

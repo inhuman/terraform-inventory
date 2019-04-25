@@ -9,20 +9,13 @@ import (
 	"strings"
 )
 
-func Convert(project string, state *terraform.State) (*Inventory, error) {
+func Convert(project string, state *terraform.State) (*YmlInventory, error) {
 
-	i := &Inventory{
-		Groups: map[string]*Group{
-			"all": {
-				Hosts:    []string{},
-				Children: []string{},
-				Vars: map[string]interface{}{
-					"project": project,
-				},
-			},
-		},
-		Meta: &Meta{
-			Hostvars: map[string]HostVar{},
+	i := &YmlInventory{
+		"all": &Group{
+			Children: make(map[string]*Group),
+			Vars:     make(map[string]interface{}),
+			Hosts:    make(map[string]map[string]string),
 		},
 	}
 
@@ -35,11 +28,13 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 			return nil, errors.New(fmt.Sprintf("paths is empty module %+v\n", m))
 		}
 
-		// if path contains only / - skip
-		//if len(m.Path) < 2 {
-		//	fmt.Printf("module continue with path: %s\n", m.Path)
-		//	continue
-		//}
+		//TODO: FIX IT
+		// works fine for modules in tf state, now work for just host
+		//if path contains only / - skip
+		if (len(m.Path) < 2) && len(state.Modules) > 1 {
+			fmt.Printf("module continue with path: %s\n", m.Path)
+			continue
+		}
 
 		outputs := getOutputs(m, state.Modules)
 
@@ -73,30 +68,16 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 				continue
 			}
 
-			fmt.Println("scanning resource:", resourceName)
-
-			if i.Groups[groupName] == nil {
+			if (*i)["all"].Children[groupName] == nil {
 
 				delete(groupValuesWithoutGroupName, "group")
 
-				i.Groups[groupName] = &Group{
-					Hosts:    []string{},
+				(*i)["all"].Children[groupName] = &Group{
+					Hosts:    map[string]map[string]string{},
 					Vars:     groupValuesWithoutGroupName,
-					Children: []string{},
+					Children: make(map[string]*Group),
 				}
 
-				if i.Groups["all"] == nil {
-					i.Groups["all"] = &Group{
-						Children: []string{
-							groupName,
-						},
-						Vars:  make(map[string]interface{}),
-						Hosts: []string{},
-					}
-				} else {
-					fmt.Println("group name", groupName)
-					i.Groups["all"].Children = append(i.Groups["all"].Children, groupName)
-				}
 			}
 
 			if resource.Primary == nil {
@@ -124,17 +105,12 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 			} else {
 				host = attrs["default_ip_address"]
 			}
-			i.Groups[groupName].Hosts = append(i.Groups[groupName].Hosts, host)
-
-			if i.Meta == nil {
-				i.Meta = &Meta{}
-			}
-
-			if i.Meta.Hostvars == nil {
-				i.Meta.Hostvars = make(map[string]HostVar)
-			}
-			i.Meta.Hostvars[host] = HostVar{
-				Hostname: attrs["name"],
+			(*i)["all"].Children[groupName].Hosts[host] = map[string]string{"hostname": attrs["name"]}
+			(*i)[groupName] = &Group{
+				Hosts: map[string]map[string]string{
+					host: {"hostname": attrs["name"]},
+				},
+				Vars: groupValuesWithoutGroupName,
 			}
 		}
 	}
@@ -142,12 +118,7 @@ func Convert(project string, state *terraform.State) (*Inventory, error) {
 	return i, nil
 }
 
-func Run(project string, state []byte) (*Inventory, error) {
-
-	//stateBytes, err := getState(consulAddr, datacenter, clusterTfStatePrefix, project)
-	//if err != nil {
-	//	return nil, err
-	//}
+func Run(project string, state []byte) (*YmlInventory, error) {
 
 	tfState := &terraform.State{}
 
@@ -181,10 +152,6 @@ func isVm(name string) bool {
 
 func getOutputs(module *terraform.ModuleState, modules []*terraform.ModuleState) map[string]*terraform.OutputState {
 
-	//if len(module.Path) == 1 {
-	//	return nil
-	//}
-
 	if module == nil {
 		return nil
 	}
@@ -207,28 +174,3 @@ func getOutputs(module *terraform.ModuleState, modules []*terraform.ModuleState)
 
 	return getOutputs(parent, modules)
 }
-
-//func getState(consulAddr, datacenter, clusterTfStatePrefix, project string) ([]byte, error) {
-//
-//	client, err := api.NewClient(&api.Config{
-//		Address: consulAddr,
-//		Scheme:  "http",
-//	})
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//	k, _, err := client.KV().Get(path.Join(clusterTfStatePrefix, project), &api.QueryOptions{
-//		Datacenter: datacenter,
-//	})
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	if k != nil {
-//		return k.Value, nil
-//	}
-//
-//	return nil, nil
-//}
