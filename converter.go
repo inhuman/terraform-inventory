@@ -28,9 +28,6 @@ func Convert(project string, state *terraform.State) (*YmlInventory, error) {
 			return nil, errors.New(fmt.Sprintf("paths is empty module %+v\n", m))
 		}
 
-		//TODO: FIX IT
-		// works fine for modules in tf state, now work for just host
-		//if path contains only / - skip
 		if (len(m.Path) < 2) && len(state.Modules) > 1 {
 			fmt.Printf("module continue with path: %s\n", m.Path)
 			continue
