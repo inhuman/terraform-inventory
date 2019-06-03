@@ -103,11 +103,20 @@ func Convert(project string, state *terraform.State) (*YmlInventory, error) {
 				host = attrs["default_ip_address"]
 			}
 			(*i)["all"].Children[groupName].Hosts[host] = map[string]string{"hostname": attrs["name"]}
-			(*i)[groupName] = &Group{
-				Hosts: map[string]map[string]string{
-					host: {"hostname": attrs["name"]},
-				},
-				Vars: groupValuesWithoutGroupName,
+
+			if (*i)[groupName] != nil {
+				(*i)[groupName].Hosts[host] = map[string]string{
+					"hostname": attrs["name"],
+				}
+
+			} else {
+
+				(*i)[groupName] = &Group{
+					Hosts: map[string]map[string]string{
+						host: {"hostname": attrs["name"]},
+					},
+					Vars: groupValuesWithoutGroupName,
+				}
 			}
 		}
 	}
