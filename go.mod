@@ -1,20 +1,14 @@
 module github.com/inhuman/terraform-inventory
 
-go 1.12
+go 1.14
 
 require (
-	github.com/ghodss/yaml v1.0.0
 	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/hashicorp/logutils v1.0.0 // indirect
-	github.com/hashicorp/terraform v0.11.13
+	github.com/hashicorp/terraform v0.12.26
 	github.com/mitchellh/cli v1.0.0 // indirect
-	github.com/mitchellh/go-homedir v1.0.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
-	github.com/pkg/errors v0.8.1
-	github.com/stretchr/testify v1.3.0
-	golang.org/x/crypto v0.0.0-20181029021203-45a5f77698d3 // indirect
-	golang.org/x/net v0.0.0-20181201002055-351d144fa1fc // indirect
-	gopkg.in/yaml.v2 v2.0.0-20170407172122-cd8b52f8269e
+	github.com/pkg/errors v0.9.1
 )
